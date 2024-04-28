@@ -3,8 +3,8 @@ import {  IsEmail, IsNotEmpty, IsOptional, IsString } from "class-validator";
 export class CreateAuthDto {
 
     @IsOptional()
-@IsString()
-readonly name?:string
+    @IsString()
+    readonly name?:string
 
     @IsEmail()
     readonly email:string

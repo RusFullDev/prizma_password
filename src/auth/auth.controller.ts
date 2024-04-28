@@ -1,21 +1,61 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import { Response } from 'express';
 import { Tokens } from './types';
+import { CookieGetter } from 'src/common/decorators/cookie-gettor.decorators';
+import { AccessTokenGuard } from 'src/common/guards';
+import { Public } from 'src/common/decorators';
+import { CreateAuthDto, LoginAuthDto, UpdateAuthDto } from './dto';
 
+
+
+
+
+// @UseGuards(AccessTokenGuard)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+
+//  @Public()
   @Post('signUp')
   async singup(@Body() createAuthDto: CreateAuthDto,
-  @Res({passthrough:true}) res:Response) :Promise<Tokens>{
+  @Res({passthrough:true}) res:Response) :Promise<Tokens>
+  {
     return this.authService.signUp(createAuthDto,res);
   }
 
 
+  
+  @Post('signIn')
+   async singin(@Body() createAuthDto: LoginAuthDto,
+  @Res({passthrough:true}) res:Response) :Promise<Tokens>{
+    console.log("sinin");
+    return this.authService.signIn(createAuthDto,res);
+  }
+
+
+  @Post('logout/:userId')
+  async logout(
+    @CookieGetter('refresh_token') refreshToken: string,
+    @Res({ passthrough: true })
+    res: Response,
+  ) {
+    return this.authService.logout(refreshToken, res);
+  }
+
+
+  @Post('/:id/refresh')
+  async refresh(
+    @Param('id') id: number,
+    @CookieGetter('refresh_token')
+    refreshToken: string,
+    @Res({ passthrough: true })
+    res: Response,
+  ) {
+    return this.authService.refreshToken(id, refreshToken, res);
+  }
+  
 
   @Post()
   create(@Body() createAuthDto: CreateAuthDto) {
